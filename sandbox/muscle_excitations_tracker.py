@@ -27,13 +27,13 @@ def generate_data(biorbd_model, final_time, nb_shooting):
     dt = final_time / nb_shooting
 
     # Casadi related stuff
-    # symbolic_states = MX.sym("x", nb_q + nb_qdot + nb_mus, 1)
+    symbolic_states = MX.sym("x", nb_q + nb_qdot + nb_mus, 1)
     symbolic_controls = MX.sym("u", nb_tau + nb_mus, 1)
     nlp = {
         "model": biorbd_model,
         "nbTau": nb_tau,
-        # "nbQ": nb_q,
-        # "nbQdot": nb_qdot,
+        "nbQ": nb_q,
+        "nbQdot": nb_qdot,
         "nbMuscle": nb_mus,
         "q_mapping": BidirectionalMapping(Mapping(range(nb_q)), Mapping(range(nb_q))),
         "q_dot_mapping": BidirectionalMapping(Mapping(range(nb_qdot)), Mapping(range(nb_qdot))),
@@ -53,7 +53,7 @@ def generate_data(biorbd_model, final_time, nb_shooting):
     dynamics_func = Function(
         "ForwardDyn",
         [symbolic_states, symbolic_controls],
-        # [Dynamics.forward_dynamics_muscle_excitations_and_torque_driven(symbolic_states, symbolic_controls, nlp)],
+        [Dynamics.forward_dynamics_muscle_excitations_and_torque_driven(symbolic_states, symbolic_controls, nlp)],
         ["x", "u"],
         ["xdot"],
     ).expand()
@@ -66,7 +66,7 @@ def generate_data(biorbd_model, final_time, nb_shooting):
     U = np.random.rand(nb_shooting, nb_mus)
 
     # Integrate and collect the position of the markers accordingly
-    # X = np.ndarray((biorbd_model.nbQ() + biorbd_model.nbQdot() + nb_mus, nb_shooting + 1))
+    X = np.ndarray((biorbd_model.nbQ() + biorbd_model.nbQdot() + nb_mus, nb_shooting + 1))
     markers = np.ndarray((3, biorbd_model.nbMarkers(), nb_shooting + 1))
 
     def add_to_data(i, q):
@@ -74,7 +74,7 @@ def generate_data(biorbd_model, final_time, nb_shooting):
         for j, mark_func in enumerate(markers_func):
             markers[:, j, i] = np.array(mark_func(q)).squeeze()
 
-    # x_init = np.array([0] * nb_q + [0] * nb_qdot + [0] * nb_mus)
+    x_init = np.array([0] * nb_q + [0] * nb_qdot + [0] * nb_mus)
     add_to_data(0, x_init)
     for i, u in enumerate(U):
         sol = solve_ivp(dyn_interface, (0, dt), x_init, method="RK45", args=(u,))
