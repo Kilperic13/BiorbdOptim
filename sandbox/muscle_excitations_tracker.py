@@ -197,6 +197,8 @@ if __name__ == "__main__":
     n_q = ocp.nlp[0]["model"].nbQ()
     n_mark = ocp.nlp[0]["model"].nbMarkers()
     n_frames = q.shape[1]
+    mus_act = mus[0]
+    mus_exci = np.array(mus[1])
 
     markers = np.ndarray((3, n_mark, q.shape[1]))
     markers_func = []
