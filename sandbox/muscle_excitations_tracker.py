@@ -214,7 +214,7 @@ if __name__ == "__main__":
         )
     for i in range(n_frames):
         for j, mark_func in enumerate(markers_func):
-            markers[:, j, i] = np.array(mark_func(np.append(q[:, i], qdot[:, i]))).squeeze()
+            markers[:, j, i] = np.array(mark_func(np.append(np.append(q[:, i], qdot[:, i]), mus_act[0][:, i]))).squeeze()
 
     plt.figure("Markers")
     for i in range(markers.shape[1]):
