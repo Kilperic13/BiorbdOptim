@@ -152,7 +152,8 @@ class ProblemType:
     @staticmethod
     def get_data_from_V(ocp, V, num_phase=None):
         V_array = np.array(V).squeeze()
-        has_muscles = False
+        has_muscles_activation = False
+        has_muscles_excitation = False
 
         if num_phase is None:
             num_phase = range(len(ocp.nlp))
@@ -186,7 +187,7 @@ class ProblemType:
                     nlp["problem_type"] == ProblemType.muscle_activations_and_torque_driven
                     or nlp["problem_type"] == ProblemType.muscles_and_torque_driven_with_contact
                 ):
-                    has_muscles = True
+                    has_muscles_activation = True
                     muscle.append(
                         ProblemType.get_data_from_V_phase(
                             V_phase, nlp["nbMuscle"], nlp["ns"], nlp["nx"] + nlp["nbTau"], nb_var, True,
