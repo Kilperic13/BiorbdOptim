@@ -176,6 +176,7 @@ class ProblemType:
                 or nlp["problem_type"] == ProblemType.torque_driven_with_contact
                 or nlp["problem_type"] == ProblemType.muscle_activations_and_torque_driven
                 or nlp["problem_type"] == ProblemType.muscles_and_torque_driven_with_contact
+                or nlp["problem_type"] == ProblemType.muscle_excitations_and_torque_driven
             ):
                 q.append(ProblemType.get_data_from_V_phase(V_phase, nlp["nbQ"], nlp["ns"] + 1, 0, nb_var, False))
                 q_dot.append(
@@ -193,6 +194,23 @@ class ProblemType:
                             V_phase, nlp["nbMuscle"], nlp["ns"], nlp["nx"] + nlp["nbTau"], nb_var, True,
                         )
                     )
+                elif (
+                    nlp["problem_type"] == ProblemType.muscle_excitations_and_torque_driven
+                ):
+                    has_muscles_excitation = True
+                    muscle_a = []
+                    muscle_e = []
+                    muscle_a.append(
+                        ProblemType.get_data_from_V_phase(
+                            V_phase, nlp["nbMuscle"], nlp["ns"], nlp["nx"] + nlp["nbTau"], nb_var, True,
+                        )
+                    )
+                    muscle_e.append(
+                        ProblemType.get_data_from_V_phase(
+                            V_phase, nlp["nbMuscle"], nlp["ns"], nlp["nx"] + nlp["nbTau"] + nlp["nbMuscle"], nb_var, True,
+                        )
+                    )
+                    muscle.append([muscle_a, muscle_e])
                 else:
                     muscle.append([])
 
@@ -204,7 +222,7 @@ class ProblemType:
             q_dot = q_dot[0]
             tau = tau[0]
             muscle = muscle[0]
-        if has_muscles:
+        if has_muscles_activation or has_muscles_excitation:
             return q, q_dot, tau, muscle
         else:
             return q, q_dot, tau
