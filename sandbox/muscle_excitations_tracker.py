@@ -74,7 +74,7 @@ def generate_data(biorbd_model, final_time, nb_shooting):
         for j, mark_func in enumerate(markers_func):
             markers[:, j, i] = np.array(mark_func(q)).squeeze()
 
-    x_init = np.array([0] * nb_q + [0] * nb_qdot + [0] * nb_mus)
+    x_init = np.array([0] * nb_q + [0] * nb_qdot + [0.5] * nb_mus)
     add_to_data(0, x_init)
     for i, u in enumerate(U):
         sol = solve_ivp(dyn_interface, (0, dt), x_init, method="RK45", args=(u,))
@@ -103,7 +103,7 @@ def prepare_ocp(
     # Add objective functions
     objective_functions = [
         {"type": Objective.Lagrange.TRACK_MUSCLES_CONTROL, "weight": 1, "data_to_track": excitations_ref},
-        {"type": Objective.Lagrange.MINIMIZE_TORQUE, "weight": 1},
+        {"type": Objective.Lagrange.MINIMIZE_TORQUE, "weight": 10000},
     ]
     if kin_data_to_track == "markers":
         objective_functions.append(
@@ -137,7 +137,7 @@ def prepare_ocp(
     X_bounds.last_node_max += [activation_max] * biorbd_model.nbMuscleTotal()
 
     # Initial guess
-    X_init = InitialConditions([0] * (biorbd_model.nbQ() + biorbd_model.nbQdot() + biorbd_model.nbMuscleTotal()))
+    X_init = InitialConditions([0] * (biorbd_model.nbQ() + biorbd_model.nbQdot()) + [activation_init] * biorbd_model.nbMuscleTotal())
 
     # Define control path constraint
     U_bounds = Bounds(
@@ -237,6 +237,7 @@ if __name__ == "__main__":
     plt.figure("Muscle excitations")
     plt.step(np.linspace(0, 2, n_shooting_points + 1), muscle_excitations_ref, "k", where="post")
     plt.step(np.linspace(0, 2, n_shooting_points + 1), mus_exci[0].T, "r--", where="post")
+    plt.step(np.linspace(0, 2, n_shooting_points + 1), mus_act[0].T, "g--", where="post")
     plt.xlabel('Time')
     plt.ylabel('Excitation values')
 
