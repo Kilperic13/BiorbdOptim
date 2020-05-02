@@ -1,5 +1,6 @@
 from casadi import vertcat, MX
 import biorbd
+import numpy as np
 
 
 class Dynamics:
@@ -89,13 +90,21 @@ class Dynamics:
         muscles_states = biorbd.VecBiorbdMuscleStateDynamics(nlp["nbMuscle"])
         muscles_excitation = controls[nlp["nbTau"] :]
         muscles_activations = states[nlp["nbQ"] + nlp["nbQdot"] :]
+        # muscles_activations_dot = []
+        muscles_activations_dot = np.zeros(nlp["nbMuscle"])
+        # muscles_activations_dot = MX.sym("act_dot", nlp["nbMuscle"], 1)
 
         for k in range(nlp["nbMuscle"]):
             muscles_states[k].setExcitation(muscles_excitation[k])
             muscles_states[k].setActivation(muscles_activations[k])
+            # muscles_activations_dot.append(muscles_states[k].timeDerivativeActivation().to_mx())
+            muscles_activations_dot[k] = muscles_states[k].timeDerivativeActivation().to_mx()
+            # muscles_activations_dot = np.append(muscles_activations_dot, muscles_states[k].timeDerivativeActivation().to_mx)
         muscles_tau = nlp["model"].muscularJointTorque(muscles_states, q, qdot).to_mx()
 
-        muscles_activations_dot = nlp["model"].activationDot(muscles_states).to_mx()
+        # muscles_activations_dot = nlp["model"].activationDot(muscles_states).to_mx()
+        # muscles_activations_dot = muscles_states.timeDerivativeActivation(muscles_excitation, muscles_activations)
+        # muscles_activations_dot = nlp["model"].timeDerivativeActivation(muscles_activations, muscles_excitation)
 
         tau = muscles_tau + residual_tau
 
@@ -103,7 +112,7 @@ class Dynamics:
 
         qdot_reduced = nlp["q_mapping"].reduce.map(qdot)
         qddot_reduced = nlp["q_dot_mapping"].reduce.map(qddot)
-        return vertcat(muscles_activations_dot, qdot_reduced, qddot_reduced)
+        return vertcat(qdot_reduced, qddot_reduced, muscles_activations_dot)
 
     @staticmethod
     def __dispatch_data(states, controls, nlp):
