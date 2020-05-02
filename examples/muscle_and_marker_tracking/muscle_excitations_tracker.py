@@ -57,7 +57,7 @@ def generate_data(biorbd_model, final_time, nb_shooting):
     ).expand()
 
     def dyn_interface(t, x, u):
-        u = np.concatenate([np.array((0, 0)), u])
+        u = np.concatenate([np.zeros(2), u])
         return np.array(dynamics_func(x, u)).squeeze()
 
     # Generate some muscle excitations
