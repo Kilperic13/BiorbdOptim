@@ -202,12 +202,12 @@ class ProblemType:
                     muscle_e = []
                     muscle_a.append(
                         ProblemType.get_data_from_V_phase(
-                            V_phase, nlp["nbMuscle"], nlp["ns"], nlp["nx"] + nlp["nbTau"], nb_var, True,
+                            V_phase, nlp["nbMuscle"], nlp["ns"] + 1, nlp["nbQ"] + nlp["nbQdot"], nb_var, False,
                         )
                     )
                     muscle_e.append(
                         ProblemType.get_data_from_V_phase(
-                            V_phase, nlp["nbMuscle"], nlp["ns"], nlp["nx"] + nlp["nbTau"] + nlp["nbMuscle"], nb_var, True,
+                            V_phase, nlp["nbMuscle"], nlp["ns"], nlp["nx"] + nlp["nbTau"], nb_var, True,
                         )
                     )
                     muscle.append([muscle_a, muscle_e])
