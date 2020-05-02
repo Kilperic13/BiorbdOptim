@@ -127,6 +127,12 @@ def prepare_ocp(
 
     # Path constraint
     X_bounds = QAndQDotBounds(biorbd_model)
+    # Due to unpredictable movement of the forward dynamics that generated the movement, the bound must be larger
+    X_bounds.first_node_min[0] = X_bounds.min[0] = X_bounds.last_node_min[0] = -2 * np.pi
+    X_bounds.first_node_max[0] = X_bounds.max[0] = X_bounds.last_node_max[0] = 2 * np.pi
+    X_bounds.first_node_min[1] = X_bounds.min[1] = X_bounds.last_node_min[1] = -2 * np.pi
+    X_bounds.first_node_max[1] = X_bounds.max[1] = X_bounds.last_node_max[1] = 2 * np.pi
+
     X_bounds.first_node_min += [activation_min] * biorbd_model.nbMuscleTotal()
     X_bounds.first_node_max += [activation_max] * biorbd_model.nbMuscleTotal()
     X_bounds.min += [activation_min] * biorbd_model.nbMuscleTotal()
