@@ -84,6 +84,87 @@ def generate_data(biorbd_model, final_time, nb_shooting):
     time_interp = np.linspace(0, final_time, nb_shooting + 1)
     return time_interp, markers, X, U
 
+def generate_data2(biorbd_model, final_time, nb_shooting):
+    # Aliases
+    nb_q = biorbd_model.nbQ()
+    nb_qdot = biorbd_model.nbQdot()
+    nb_tau = biorbd_model.nbGeneralizedTorque()
+    nb_mus = biorbd_model.nbMuscleTotal()
+    nb_markers = biorbd_model.nbMarkers()
+    dt = final_time / nb_shooting
+
+    # Casadi related stuff
+    symbolic_states = MX.sym("x", nb_q + nb_qdot + nb_mus, 1)
+    symbolic_controls = MX.sym("u", nb_tau + nb_mus, 1)
+    nlp = {
+        "model": biorbd_model,
+        "nbTau": nb_tau,
+        "nbQ": nb_q,
+        "nbQdot": nb_qdot,
+        "nbMuscle": nb_mus,
+        "q_mapping": BidirectionalMapping(Mapping(range(nb_q)), Mapping(range(nb_q))),
+        "q_dot_mapping": BidirectionalMapping(Mapping(range(nb_qdot)), Mapping(range(nb_qdot))),
+        "tau_mapping": BidirectionalMapping(Mapping(range(nb_tau)), Mapping(range(nb_tau))),
+    }
+    markers_func = []
+    for i in range(nb_markers):
+        markers_func.append(
+            Function(
+                "ForwardKin",
+                [symbolic_states],
+                [biorbd_model.marker(symbolic_states[:nb_q], i).to_mx()],
+                ["q"],
+                ["marker_" + str(i)],
+            ).expand()
+        )
+    dynamics_func = Function(
+        "ForwardDyn",
+        [symbolic_states, symbolic_controls],
+        [Dynamics.forward_dynamics_muscle_excitations_and_torque_driven(symbolic_states, symbolic_controls, nlp)],
+        ["x", "u"],
+        ["xdot"],
+    ).expand()
+
+    def dyn_interface1(t, x, u):
+        nb_q = biorbd_model.nbQ()
+        nb_qdot = biorbd_model.nbQdot()
+        nb_tau = biorbd_model.nbGeneralizedTorque()
+        u = np.concatenate([np.zeros(nb_tau), u])
+        return np.array(dynamics_func(x, u)).squeeze()[: nb_q + nb_qdot], x_init
+
+    def dyn_interface2(t, x, u):
+        nb_q = biorbd_model.nbQ()
+        nb_qdot = biorbd_model.nbQdot()
+        nb_tau = biorbd_model.nbGeneralizedTorque()
+        u = np.concatenate([np.zeros(nb_tau), u])
+        return np.array(dynamics_func(x, u)).squeeze()[nb_q + nb_qdot :]
+
+    # Generate some muscle excitations
+    U = np.random.rand(nb_shooting, nb_mus)
+
+    # Integrate and collect the position of the markers accordingly
+    X = np.ndarray((biorbd_model.nbQ() + biorbd_model.nbQdot() + nb_mus, nb_shooting + 1))
+    markers = np.ndarray((3, biorbd_model.nbMarkers(), nb_shooting + 1))
+
+    def add_to_data(i, q):
+        X[:, i] = q
+        for j, mark_func in enumerate(markers_func):
+            markers[:, j, i] = np.array(mark_func(q)).squeeze()
+
+    x_init1 = np.zeros(nb_q + nb_qdot)
+    x_init2 = np.zeros(nb_mus)
+    x_init = np.concatenate([x_init1, x_init2])
+    add_to_data(0, x_init)
+    for i, u in enumerate(U):
+        sol1 = solve_ivp(dyn_interface1, (0, dt), x_init, method="RK45", args=(u,))
+        x_init1 = sol1["y"][:, -1]
+        sol2 = solve_ivp(dyn_interface2, (0, dt), x_init, method="RK45", args=(u,))
+        x_init2 = sol2["y"][:, -1]
+        x_init = np.concatenate([x_init1, x_init2])
+        add_to_data(i + 1, x_init)
+
+    time_interp = np.linspace(0, final_time, nb_shooting + 1)
+    return time_interp, markers, X, U
 
 def prepare_ocp(
     biorbd_model,
@@ -238,6 +319,7 @@ if __name__ == "__main__":
     plt.step(np.linspace(0, 2, n_shooting_points + 1), muscle_excitations_ref, "k", where="post")
     plt.step(np.linspace(0, 2, n_shooting_points + 1), mus_exci[0].T, "r--", where="post")
     plt.step(np.linspace(0, 2, n_shooting_points + 1), mus_act[0].T, "g--", where="post")
+
     plt.xlabel('Time')
     plt.ylabel('Excitation values')
 
