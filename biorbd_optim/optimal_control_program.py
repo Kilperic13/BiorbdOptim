@@ -146,7 +146,7 @@ class OptimalControlProgram:
             elif isinstance(objective_functions, (list, tuple)):
                 for objective_function in objective_functions:
                     if isinstance(objective_function, dict):
-                        raise RuntimeError("Each phase must declares its objective (even if it is empty)")
+                        raise RuntimeError("Each phase must declare its objective (even if it is empty)")
             self.__add_to_nlp("objective_functions", objective_functions, False)
             for i in range(self.nb_phases):
                 ObjectiveFunction.add(self, self.nlp[i])
