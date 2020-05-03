@@ -98,11 +98,12 @@ class Dynamics:
             muscles_states[k].setExcitation(muscles_excitation[k])
             muscles_states[k].setActivation(muscles_activations[k])
             # muscles_activations_dot.append(muscles_states[k].timeDerivativeActivation().to_mx())
-            muscles_activations_dot[k] = muscles_states[k].timeDerivativeActivation().to_mx()
+            # muscles_activations_dot[k] = muscles_states[k].timeDerivativeActivation().to_mx()
+            # muscles_activations_dot[k] = muscles_states[k].timeDerivativeActivation(muscles_excitation[k], muscles_activations[k]).to_mx()
             # muscles_activations_dot = np.append(muscles_activations_dot, muscles_states[k].timeDerivativeActivation().to_mx)
         muscles_tau = nlp["model"].muscularJointTorque(muscles_states, q, qdot).to_mx()
 
-        # muscles_activations_dot = nlp["model"].activationDot(muscles_states).to_mx()
+        muscles_activations_dot = nlp["model"].activationDot(muscles_states).to_mx()
         # muscles_activations_dot = muscles_states.timeDerivativeActivation(muscles_excitation, muscles_activations)
         # muscles_activations_dot = nlp["model"].timeDerivativeActivation(muscles_activations, muscles_excitation)
 
