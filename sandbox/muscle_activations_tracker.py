@@ -100,7 +100,7 @@ def prepare_ocp(
     # Add objective functions
     objective_functions = [
         {"type": Objective.Lagrange.TRACK_MUSCLES_CONTROL, "weight": 1, "data_to_track": activations_ref},
-        {"type": Objective.Lagrange.MINIMIZE_TORQUE, "weight": 1},
+        {"type": Objective.Lagrange.MINIMIZE_TORQUE, "weight": 100},
     ]
     if kin_data_to_track == "markers":
         objective_functions.append(
@@ -128,7 +128,11 @@ def prepare_ocp(
     X_bounds = QAndQDotBounds(biorbd_model)
 
     # Initial guess
-    X_init = InitialConditions([0] * (biorbd_model.nbQ() + biorbd_model.nbQdot()))
+    # X_init = InitialConditions([0] * (biorbd_model.nbQ() + biorbd_model.nbQdot()))
+    Initi_Debut = 1
+    Initi_Fin = -1
+    InitLineaire = True
+    X_init = InitialConditions([Initi_Debut, Initi_Fin] * biorbd_model.nbQ() + [2*Initi_Debut, 0.5*Initi_Fin] * biorbd_model.nbQdot(), InitLineaire)
 
     # Define control path constraint
     U_bounds = Bounds(
@@ -138,6 +142,7 @@ def prepare_ocp(
     U_init = InitialConditions(
         [torque_init] * biorbd_model.nbGeneralizedTorque() + [activation_init] * biorbd_model.nbMuscleTotal()
     )
+    # U_init = InitialConditions([Initi_Debut, Initi_Fin] * (biorbd_model.nbGeneralizedTorque() + biorbd_model.nbMuscleTotal()), InitLineaire)
 
     # ------------- #
 
