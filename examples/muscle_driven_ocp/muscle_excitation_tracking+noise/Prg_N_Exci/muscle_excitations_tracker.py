@@ -234,6 +234,7 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
             # plt.show()
 
             # Track these data
+            biorbd_model = biorbd.Model(MP.model)  # To allow for non free variable, the model must be reloaded
             ocp = prepare_ocp(
                 biorbd_model,
                 final_time,
