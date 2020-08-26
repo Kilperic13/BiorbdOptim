@@ -246,7 +246,7 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
             )
 
             # --- Solve the program --- #
-            sol = ocp.solve(show_online_optim=True)
+            sol = ocp.solve(show_online_optim=False)
 
             # --- Show the results --- #
             states_sol, controls_sol = Data.get_data(ocp, sol["x"])
