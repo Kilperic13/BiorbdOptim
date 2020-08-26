@@ -203,6 +203,9 @@ for i, D in enumerate(DEN):
 # Prepare the creation of New Data
 pathRamd = MP.pathRamd
 Rmd_E = MP.Ramd_E
+PctBE = MP.PourcentBaseE
+Rmd_M = MP.Ramd_M
+PctBM = MP.PourcentBaseM
 a = 'DR'
 c = MP.c
 
@@ -215,59 +218,62 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
     t = RefData2[i][4]
     I = f'{i + 1}'
 
-    for pc_E, PourCent_E in enumerate(Rmd_E):  # Jeu de bruit Excitation: 0, 5, 10, 15, 20
-        if not os.path.exists(pathRamd + '/' + PourCent_E):
-            os.mkdir(pathRamd + '/' + PourCent_E)
-        for Essaie in c:  # Jeu d'essaie : 1, 2, 3, 4, 5
-            # Generate random data to fit
-            NewExcitation = Ramdomisation(nb_shooting=n_shooting_points, nivR_E=(pc_E) * 5,
-                                          Data_E=muscle_excitations_ref[:-1])
+    for pc_M, PourCent_M in enumerate(Rmd_M):                       # Jeu de bruit Marqueur : 0, 6, 12, 18
+        for pc_E, PourCent_E in enumerate(Rmd_E):                   # Jeu de bruit Excitation: 0, 7, 14
+            if not os.path.exists(pathRamd + '/' + PourCent_M + 'and' + PourCent_E):
+                os.mkdir(pathRamd + '/' + PourCent_M + 'and' + PourCent_E)
+            for Essaie in c:                                        # Jeu d'essaie : 1, 2, 3
+                # Generate random data to fit
+                NewMark = Ramdomisation(nb_shooting=n_shooting_points, nivR_M=(pc_M) * PctBM, Data_M=markers_ref)
+                NewExcitation = Ramdomisation(nb_shooting=n_shooting_points, nivR_E=(pc_E) * PctBE,
+                                              Data_E=muscle_excitations_ref[:-1])
 
-            # # See the new data compare to the older one
-            # NE = np.append(NewExcitation, NewExcitation[-1:, :], axis=0)
-            # plt.figure("Muscle excitations visual")
-            # plt.step(np.linspace(0, final_time, n_shooting_points + 1), muscle_excitations_ref, "k", where="post")
-            # plt.step(np.linspace(0, final_time, n_shooting_points + 1), NE, "g*", where="post")
-            # plt.xlabel("Time")
-            # plt.ylabel("Excitation values")
-            # plt.show()
+                # # See the new data compare to the older one
+                # NE = np.append(NewExcitation, NewExcitation[-1:, :], axis=0)
+                # plt.figure("Muscle excitations visual")
+                # plt.step(np.linspace(0, final_time, n_shooting_points + 1), muscle_excitations_ref, "k", where="post")
+                # plt.step(np.linspace(0, final_time, n_shooting_points + 1), NE, "g*", where="post")
+                # plt.xlabel("Time")
+                # plt.ylabel("Excitation values")
+                # plt.show()
 
-            # Track these data
-            biorbd_model = biorbd.Model("arm26_modifie.bioMod")  # To allow for non free variable, the model must be reloaded
-            ocp = prepare_ocp(
-                biorbd_model,
-                final_time,
-                n_shooting_points,
-                markers_ref,
-                NewExcitation.T,
-                x_ref[: biorbd_model.nbQ(), :],
-                use_residual_torque=use_residual_torque,
-                kin_data_to_track="markers",
-            )
+                # Track these data
+                biorbd_model = biorbd.Model("arm26_modifie.bioMod")  # To allow for non free variable, the model must be reloaded
+                ocp = prepare_ocp(
+                    biorbd_model,
+                    final_time,
+                    n_shooting_points,
+                    NewMark,
+                    NewExcitation.T,
+                    x_ref[: biorbd_model.nbQ(), :],
+                    use_residual_torque=use_residual_torque,
+                    kin_data_to_track="markers",
+                )
 
-            # --- Solve the program --- #
-            sol = ocp.solve(show_online_optim=False)
+                # --- Solve the program --- #
+                sol = ocp.solve(show_online_optim=False)
 
-            # --- Show the results --- #
-            states_sol, controls_sol = Data.get_data(ocp, sol["x"])
-            q = states_sol["q"]
-            q_dot = states_sol["q_dot"]
-            activations = states_sol["muscles"]
-            if use_residual_torque:
-                tau = controls_sol["tau"]
-            excitations = controls_sol["muscles"]
-            n_q = ocp.nlp[0]["model"].nbQ()
-            # n_qdot = ocp.nlp[0]["model"].nbQdot()
-            # n_mark = ocp.nlp[0]["model"].nbMarkers()
-            # n_frames = q.shape[1]
+                # --- Show the results --- #
+                states_sol, controls_sol = Data.get_data(ocp, sol["x"])
+                q = states_sol["q"]
+                q_dot = states_sol["q_dot"]
+                activations = states_sol["muscles"]
+                if use_residual_torque:
+                    tau = controls_sol["tau"]
+                excitations = controls_sol["muscles"]
+                n_q = ocp.nlp[0]["model"].nbQ()
+                # n_qdot = ocp.nlp[0]["model"].nbQdot()
+                # n_mark = ocp.nlp[0]["model"].nbMarkers()
+                # n_frames = q.shape[1]
 
-            # --- Save the results --- #
-            NewPath = pathRamd + '/' + PourCent_E + '/' + a + I + Essaie
-            os.mkdir(NewPath)
-            np.save(NewPath + '/r-q_ref.npy', x_ref[:n_q, :].T)
-            np.save(NewPath + '/r-q.npy', q)
-            np.save(NewPath + '/r-q_dot.npy', q_dot)
-            np.save(NewPath + '/r-activations.npy', activations)
-            np.save(NewPath + '/r-tau.npy', tau)
-            np.save(NewPath + '/r-excitations.npy', excitations.T)
-            np.save(NewPath + '/r-nexci.npy', NewExcitation)
+                # --- Save the results --- #
+                NewPath = pathRamd + '/' + PourCent_E + '/' + a + I + Essaie
+                os.mkdir(NewPath)
+                np.save(NewPath + '/r-q_ref.npy', x_ref[:n_q, :].T)
+                np.save(NewPath + '/r-q.npy', q)
+                np.save(NewPath + '/r-q_dot.npy', q_dot)
+                np.save(NewPath + '/r-activations.npy', activations)
+                np.save(NewPath + '/r-tau.npy', tau)
+                np.save(NewPath + '/r-excitations.npy', excitations.T)
+                np.save(NewPath + '/r-nexci.npy', NewExcitation)
+                np.save(NewPath + '/r-newmark.npy', NewMark)

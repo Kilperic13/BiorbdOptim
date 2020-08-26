@@ -17,11 +17,14 @@ RefData2 = RefData.tolist()
 #### Define Path of creation of data
 pathRamd = '/home/lim/Devel_V3/BiorbdOptim/examples/muscle_driven_ocp/muscle_excitation_tracking+noise/Prg_N_Exci-Mark/Data_NEM'
 # How many % do you want ?
-PourcentBase = 6
-PorcentMany = 3
-Ramd_E = [f'DR_E {i * PourcentBase}%' for i in range(PorcentMany)]
-Ramd_E2 = ['DR_E 0%', 'DR_E 6%', 'DR_E 12%']
+PourcentBaseE = 7
+PorcentManyE = 3
+Ramd_E = [f'DR_E {i * PourcentBaseE}%' for i in range(PorcentManyE)]
+Ramd_E2 = ['DR_E 0%', 'DR_E 7%', 'DR_E 14%']
     # Here, for exemple, Ramd_E == Ramd_E2
+PourcentBaseM = 6
+PorcentManyM = 4
+Ramd_M = [f'DR_M {i * PourcentBaseM}%' for i in range(PorcentManyM)]
 #How many essaie by % do you want ?
 PorcentEssaie = 3
 c = [f'.{i+1}' for i in range(PorcentEssaie)]
