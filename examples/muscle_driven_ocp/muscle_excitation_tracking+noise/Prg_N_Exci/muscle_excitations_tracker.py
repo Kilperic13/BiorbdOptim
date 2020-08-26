@@ -239,7 +239,7 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
                 final_time,
                 n_shooting_points,
                 markers_ref,
-                NewExcitation,
+                NewExcitation.T,
                 x_ref[: biorbd_model.nbQ(), :],
                 use_residual_torque=use_residual_torque,
                 kin_data_to_track="markers",
@@ -269,5 +269,5 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
             np.save(NewPath + '/r-q_dot.npy', q_dot)
             np.save(NewPath + '/r-activations.npy', activations)
             np.save(NewPath + '/r-tau.npy', tau)
-            np.save(NewPath + '/r-excitations.npy', excitations)
+            np.save(NewPath + '/r-excitations.npy', excitations.T)
             np.save(NewPath + '/r-nexci.npy', NewExcitation)

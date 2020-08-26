@@ -15,11 +15,11 @@ RefData = np.ones((len(DataEssaieName), len(DataRef)))
 RefData2 = RefData.tolist()
 
 #### Define Path of creation of data
-pathRamd = '/home/lim/Devel_V2/BiorbdOptim/examples/sandbox/Colombe/Excitation-Activation/Data_Article/Prg_R_Exci-Mark/Data'
+pathRamd = '/home/lim/Devel_V3/BiorbdOptim/examples/muscle_driven_ocp/muscle_excitation_tracking+noise/Prg_N_Exci/Data_NE'
 # How many % do you want ?
 PourcentBase = 5
-PorcentMany = 4
-Ramd_E = [f'DR_E {(1+i) * PourcentBase}%' for i in range(PorcentMany)]
+PorcentMany = 5
+Ramd_E = [f'DR_E {i * PourcentBase}%' for i in range(PorcentMany)]
 Ramd_E2 = ['DR_E 0%', 'DR_E 5%', 'DR_E 10%', 'DR_E 15%', 'DR_E 20%']
     # Here, for exemple, Ramd_E == Ramd_E2
 #How many essaie by % do you want ?

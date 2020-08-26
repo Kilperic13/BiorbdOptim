@@ -5,6 +5,9 @@
 # THis data will be noised and will served in the input of the optimisation
 # First step : Complite the MainPrg.py files, it will parametre all the other prg
 # Second step : Compile the MainPrg.py
+# 2.5th step : Check Your Data !! :
+#                       - if you don't have already some data or file in pathRamd
+#                       - if you have your original data in pathRef
 # Thrid step : Compile the msucle_excitations_traker-RE.py
 # 4th step : Compile the Analyse_Data.py
 # 5th step : Compile the plot.py

@@ -44,8 +44,8 @@ class IpoptInterface(SolverInterface):
 
     def configure(self, solver_options):
         options = {
-            "ipopt.tol": 1e-6,
-            "ipopt.max_iter": 1000,
+            "ipopt.tol": 1e-3,
+            "ipopt.max_iter": 5,
             "ipopt.hessian_approximation": "exact",  # "exact", "limited-memory"
             "ipopt.limited_memory_max_history": 50,
             "ipopt.linear_solver": "mumps",  # "ma57", "ma86", "mumps"
