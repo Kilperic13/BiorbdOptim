@@ -203,6 +203,7 @@ for i, D in enumerate(DEN):
 # Prepare the creation of New Data
 pathRamd = MP.pathRamd
 Rmd_E = MP.Ramd_E
+PctBE = MP.PourcentBase
 a = 'DR'
 c = MP.c
 
@@ -220,7 +221,7 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
             os.mkdir(pathRamd + '/' + PourCent_E)
         for Essaie in c:  # Jeu d'essaie : 1, 2, 3, 4, 5
             # Generate random data to fit
-            NewExcitation = Ramdomisation(nb_shooting=n_shooting_points, nivR_E=(pc_E) * 5,
+            NewExcitation = Ramdomisation(nb_shooting=n_shooting_points, nivR_E=(pc_E) * PctBE,
                                           Data_E=muscle_excitations_ref[:-1])
 
             # # See the new data compare to the older one
