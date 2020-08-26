@@ -122,7 +122,7 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
     t = RefData2[i][4]
     I = f'{i + 1}'
     # LNbDossier = []
-    for PourCent in DRef:                               # Jeu de bruit : 0, 5, 10, 15, 20
+    for PourCent in Rmd_E:                               # Jeu de bruit : 0, 5, 10, 15, 20
         # NbDossier = 0
         for Essaie in c:                                # Jeu d'essaie : 1, 2, 3, 4, 5
             List_Data_Ramd = [[0]]
