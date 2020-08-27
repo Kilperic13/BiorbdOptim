@@ -6,7 +6,7 @@ final_time = 1.5
 n_shooting_points = 29
 use_residual_torque = True
 
-### Difine where are your originals datas - Name of the groupe of essaies - name of which data are safe
+### Define where are your originals datas - Name of the groupe of essaies - name of which data are safe
 pathRef = '/home/lim/Devel_V3/BiorbdOptim/examples/muscle_driven_ocp/muscle_excitation_tracking+noise/Data'
 DataEssaieName = ['D28-1', 'D10-2', 'D14-3']
 DataRef = ['excitations_ref.npy', 'markers_ref.npy', 'x_ref.npy', 'activations_ref.npy', 't.npy']

@@ -9,7 +9,6 @@ import MainPgr as MP
 ## Import Information ###
 
 biorbd_model = biorbd.Model(MP.model)
-final_time = MP.final_time
 ns = MP.n_shooting_points
 n_q = biorbd_model.nbQ()
 n_qdot = biorbd_model.nbQdot()
