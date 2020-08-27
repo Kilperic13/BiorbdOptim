@@ -182,20 +182,21 @@ Data3DX = []
 Data3DY = []
 for i in range(PctMM):                  # Pour les % erreurs du marqueur
     for j in range(PctME):              # Pour les % erreurs de l'excitation
-        dataX.append([EMX[0 + i*25 + j*5] + EMX[1 + i*25 + j*5] + EMX[2 + i*25 + j*5] + EMX[3 + i*25 + j*5] + EMX[4 + i*25 + j*5]][0])
-        dataY.append([EMX[0 + j * 25 + i * 5] + EMX[1 + j * 25 + i * 5] + EMX[2 + j * 25 + i * 5] + EMX[
-            3 + j * 25 + i * 5] + EMX[4 + j * 25 + i * 5]][0])
-        # On a un ecart de 25 pour i, car entre 2 bruit de marqueur, on a un ecart de (Nb de Jeux * Nb de Bruit Excitation = 25)
-        # On a alors un ecart de j*5 entre les bruits de E
-        if j == 4:
-            Data3DX.append(dataX[i*5: i*5+j+1])
-            Data3DY.append(dataY[i * 5: i * 5 + j + 1])
+        dataX.append(Add_List(EMX, PctEss, Start = (i*(PctEss*PctME) + j*PctEss)))
+        # L'ecart pour i, entre 2 bruit de marqueur, est de (Nb de Jeux * Nb de Bruit Excitation)
+        # On a alors un ecart de j*Nb de Jeux entre les bruits de E
+        dataY.append(Add_List(EMX, PctEss, Start = (i*PctEss + j*(PctEss*PctMM))))
+        # dataY non exploité. L'idée était de faire comme dataX, mais au lieu de "partir vers l'axe X" en 3D,
+        # c'était de partir vers l'axe Y
+        if j == (PctME-1):
+            Data3DX.append(dataX[i*5: (i*5)+j+1])
+            Data3DY.append(dataY[i*5: (i*5)+j+1])
 # Data3D = [np.mean(data[i]) for i in range(len(data))]
 ddX = [[np.mean(Data3DX[i][j]) for j in range(len(Data3DX[i]))] for i in range(len(Data3DX))]
 ddY = [[np.mean(Data3DY[i][j]) for j in range(len(Data3DY[i]))] for i in range(len(Data3DY))]
 
-X = np.array([0, 5, 10, 15, 20])        # For the excitation error
-Y = np.array([0, 5, 10, 15, 20])        # For the markeurs error
+X = np.array([i * PctBE for i in range(PctME)])        # For the excitation error
+Y = np.array([i * PctBM for i in range(PctMM)])        # For the markeurs error
 Z = np.array(ddX)
 
 Xx = np.array([0, 5, 10, 15, 20] * 5)
@@ -240,6 +241,6 @@ ax.set_ylabel('Markeurs X Errors in mean (%)', fontsize='14')
 ax.set_zlabel('Values of the errors in mean', fontsize='14')
 ax.set_yticks(Y)            # Fait apparaitre uniquement les valeurs de Y vouluent
 ax.set_xticks(X)
-ax.set_title('Evolution of the porcent of the error', fontsize='20')
+ax.set_title('Evolution of the error of X-axis for each marker by Increment compare to the different input noises data', fontsize='20')
 
 plt.show('Test 3D')
