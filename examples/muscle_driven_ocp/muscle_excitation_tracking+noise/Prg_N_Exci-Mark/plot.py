@@ -189,8 +189,8 @@ for i in range(PctMM):                  # Pour les % erreurs du marqueur
         # dataY non exploité. L'idée était de faire comme dataX, mais au lieu de "partir vers l'axe X" en 3D,
         # c'était de partir vers l'axe Y
         if j == (PctME-1):
-            Data3DX.append(dataX[i*5: (i*5)+j+1])
-            Data3DY.append(dataY[i*5: (i*5)+j+1])
+            Data3DX.append(dataX[i*PctEss: (i*PctEss)+j+1])
+            Data3DY.append(dataY[i*PctEss: (i*PctEss)+j+1])
 # Data3D = [np.mean(data[i]) for i in range(len(data))]
 ddX = [[np.mean(Data3DX[i][j]) for j in range(len(Data3DX[i]))] for i in range(len(Data3DX))]
 ddY = [[np.mean(Data3DY[i][j]) for j in range(len(Data3DY[i]))] for i in range(len(Data3DY))]
@@ -199,8 +199,8 @@ X = np.array([i * PctBE for i in range(PctME)])        # For the excitation erro
 Y = np.array([i * PctBM for i in range(PctMM)])        # For the markeurs error
 Z = np.array(ddX)
 
-Xx = np.array([0, 5, 10, 15, 20] * 5)
-Yy = np.array([[i*5] * 5 for i in range(5)]).ravel()
+Xx = np.array([i * PctBE for i in range(PctME)] * PctEss)
+Yy = np.array([[i*PctBM] * PctEss for i in range(PctMM)]).ravel()
 Zz = np.array(ddX).ravel()
 
 # Plot the results
