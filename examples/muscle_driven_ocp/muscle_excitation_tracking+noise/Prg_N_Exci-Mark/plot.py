@@ -168,3 +168,78 @@ plt.ylim(-0.1, 4)
 # plt.show()
 
 
+## Test 3D ##
+
+# Figure Creation
+fig = plt.figure('Test 3D')
+ax = fig.add_subplot(111, projection='3d')
+colors = ['r', 'g', 'b', 'y', 'c']
+
+# Data Creation
+dataX = []
+dataY = []
+Data3DX = []
+Data3DY = []
+for i in range(PctMM):                  # Pour les % erreurs du marqueur
+    for j in range(PctME):              # Pour les % erreurs de l'excitation
+        dataX.append([EMX[0 + i*25 + j*5] + EMX[1 + i*25 + j*5] + EMX[2 + i*25 + j*5] + EMX[3 + i*25 + j*5] + EMX[4 + i*25 + j*5]][0])
+        dataY.append([EMX[0 + j * 25 + i * 5] + EMX[1 + j * 25 + i * 5] + EMX[2 + j * 25 + i * 5] + EMX[
+            3 + j * 25 + i * 5] + EMX[4 + j * 25 + i * 5]][0])
+        # On a un ecart de 25 pour i, car entre 2 bruit de marqueur, on a un ecart de (Nb de Jeux * Nb de Bruit Excitation = 25)
+        # On a alors un ecart de j*5 entre les bruits de E
+        if j == 4:
+            Data3DX.append(dataX[i*5: i*5+j+1])
+            Data3DY.append(dataY[i * 5: i * 5 + j + 1])
+# Data3D = [np.mean(data[i]) for i in range(len(data))]
+ddX = [[np.mean(Data3DX[i][j]) for j in range(len(Data3DX[i]))] for i in range(len(Data3DX))]
+ddY = [[np.mean(Data3DY[i][j]) for j in range(len(Data3DY[i]))] for i in range(len(Data3DY))]
+
+X = np.array([0, 5, 10, 15, 20])        # For the excitation error
+Y = np.array([0, 5, 10, 15, 20])        # For the markeurs error
+Z = np.array(ddX)
+
+Xx = np.array([0, 5, 10, 15, 20] * 5)
+Yy = np.array([[i*5] * 5 for i in range(5)]).ravel()
+Zz = np.array(ddX).ravel()
+
+# Plot the results
+
+## Test 1
+# from matplotlib import cm
+# ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.viridis)
+
+## Test 1.5 - Don't work -
+# Plot projections of the contours for each dimension.  By choosing offsets
+# that match the appropriate axes limits, the projected contours will sit on
+# the 'walls' of the graph
+# cset = ax.contourf(X, Y, Z, zdir='z', offset=-0, cmap=cm.coolwarm)
+# cset = ax.contourf(X, Y, Z, zdir='x', offset=0, cmap=cm.coolwarm)
+# cset = ax.contourf(X, Y, Z, zdir='y', offset=25, cmap=cm.coolwarm)
+
+## Test 2
+# ax.plot_wireframe(X, Y, Z, rstride=50, cstride=50)
+
+## Test 3   - Second best -
+# for c, k, n in zip(colors, Y, np.arange(5)):
+#     # Plot the bar graph given by xs and ys on the plane y=k with 80% opacity (alpha=0.8).
+#     cs = [c] * len(X)
+#     ax.bar(X, ddY[n], zs=k, zdir='y', color=cs, alpha=0.8)
+
+## Test 4
+# XX, YY = np.meshgrid(ddX, ddY)
+# x, y = XX.ravel(), YY.ravel()
+# ax.bar3d(x=x, y=y, z=0, dx=1, dy=5, dz=0, color=colors, alpha=0.4, shade=True)
+
+## Test 5   - Chosen -
+zpos = 0
+dx = dy = 0.95 * np.ones_like(zpos)
+ax.bar3d(Yy, Xx, zpos, dx, dy, Zz, zsort='average', alpha=0.6)
+
+ax.set_xlabel('Excitation Errors in mean (%)', fontsize='14')          # Donne des noms aux axes
+ax.set_ylabel('Markeurs X Errors in mean (%)', fontsize='14')
+ax.set_zlabel('Values of the errors in mean', fontsize='14')
+ax.set_yticks(Y)            # Fait apparaitre uniquement les valeurs de Y vouluent
+ax.set_xticks(X)
+ax.set_title('Evolution of the porcent of the error', fontsize='20')
+
+plt.show('Test 3D')
