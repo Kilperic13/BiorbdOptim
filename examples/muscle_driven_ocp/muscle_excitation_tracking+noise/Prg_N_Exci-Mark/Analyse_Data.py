@@ -47,9 +47,10 @@ for i, D in enumerate(DEN):
 # Recuperation  New Data
 pathRamd = MP.pathRamd
 Rmd_E = MP.Ramd_E
+Rmd_M = MP.Ramd_M
 a = 'DR'
 c = MP.c
-Donner = ['r-activations.npy', 'r-tau.npy', 'r-q_dot.npy', 'r-excitations.npy', 'r-q.npy', 'r-nexci.npy']
+Donner = ['r-activations.npy', 'r-tau.npy', 'r-q_dot.npy', 'r-excitations.npy', 'r-q.npy', 'r-nexci.npy', 'r-newmark.npy']
 
 # Preparation files
 NbDossierRamd = []
@@ -122,29 +123,32 @@ for i in range(len(DEN)):                          # Jeu de donner brut : 1, 2, 
     t = RefData2[i][4]
     I = f'{i + 1}'
     # LNbDossier = []
-    for PourCent in DRef:                               # Jeu de bruit : 0, 5, 10, 15, 20
-        # NbDossier = 0
-        for Essaie in c:                                # Jeu d'essaie : 1, 2, 3, 4, 5
-            List_Data_Ramd = [[0]]
-            for d, D in enumerate(Donner):
-                pathRamd2 = os.path.join(pathRamd, PourCent, a + I + Essaie, D)
-                if os.path.exists(pathRamd2):
-                    List_Data_Ramd[d] = np.load(pathRamd2)
-                    List_Data_Ramd.append([0])
-            q = List_Data_Ramd[4]
-            q_dot = List_Data_Ramd[2]
-            activations = List_Data_Ramd[0]
-            tau = List_Data_Ramd[1]
-            excitations = List_Data_Ramd[3]
-            new_exci = List_Data_Ramd[5:]
-            # NbDossier += 1
-            errer_exci.append(cal_err_exci(muscle_excitations_ref, excitations))
-            NE = np.append(new_exci, new_exci[-1:, :], axis=0)
-            errer_exci_virtuel.append(cal_err_exci(NE, excitations))
-            markers = recup_mark(q)
-            for i in range(3):
-                errer_mark.append(cal_err_mark(markers_ref, markers, i))
-            errer_q.append(cal_err_q(x_ref, q))
+    for PourCent_M in Rmd_M:                                # Jeu de bruit M: 0%, 6%, 12%, 18%
+        for PourCent_E in Rmd_E:                            # Jeu de bruit E: 0, 7, 14
+            # NbDossier = 0
+            for Essaie in c:                                # Jeu d'essaie : 1, 2, 3
+                List_Data_Ramd = [[0]]
+                for d, D in enumerate(Donner):
+                    pathRamd2 = os.path.join(pathRamd, PourCent_M + 'and' + PourCent_E, a + I + Essaie, D)
+                    if os.path.exists(pathRamd2):
+                        List_Data_Ramd[d] = np.load(pathRamd2)
+                        List_Data_Ramd.append([0])
+                q = List_Data_Ramd[4]
+                q_dot = List_Data_Ramd[2]
+                activations = List_Data_Ramd[0]
+                tau = List_Data_Ramd[1]
+                excitations = List_Data_Ramd[3]
+                new_exci = List_Data_Ramd[5]
+                new_mark = List_Data_Ramd[6:]
+                # NbDossier += 1
+                errer_exci.append(cal_err_exci(muscle_excitations_ref, excitations))
+                NE = np.append(new_exci, new_exci[-1:, :], axis=0)
+                errer_exci_virtuel.append(cal_err_exci(NE, excitations))
+                markers = recup_mark(q)
+                for i in range(3):
+                    errer_mark.append(cal_err_mark(markers_ref, markers, i))
+                    errer_mark_virtuel.append(cal_err_mark(new_mark, markers, i))
+                errer_q.append(cal_err_q(x_ref, q))
 
 
 ### Analyse Data to save ###
@@ -159,3 +163,10 @@ ErrMZ = errer_mark[2::3]
 np.save('RE_er_mark_X.npy', ErrMX)
 np.save('RE_er_mark_Y.npy', ErrMY)
 np.save('RE_er_mark_Z.npy', ErrMZ)
+
+ErrVirMX = errer_mark_virtuel[::3]
+ErrVirMY = errer_mark_virtuel[1::3]
+ErrVirMZ = errer_mark_virtuel[2::3]
+np.save('RE_er_mark_vir_X.npy', ErrVirMX)
+np.save('RE_er_mark_vir_Y.npy', ErrVirMY)
+np.save('RE_er_mark_vir_Z.npy', ErrVirMZ)
